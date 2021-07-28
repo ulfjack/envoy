@@ -3,6 +3,7 @@
 # Reformat API protos to canonical proto style using protoxform.
 
 set -e
+set -x
 
 read -ra BAZEL_BUILD_OPTIONS <<< "${BAZEL_BUILD_OPTIONS:-}"
 
@@ -13,7 +14,7 @@ read -ra BAZEL_BUILD_OPTIONS <<< "${BAZEL_BUILD_OPTIONS:-}"
 }
 
 # Developers working on protoxform and other proto format tooling changes will need to override the
-# following check by setting FORCE_PROTO_FORMAT=yes in the environment.
+# following check by setting FORCE_PROTO_FORMAT=yes in the environment. fixfix contrib protos
 ./tools/git/modified_since_last_github_commit.sh ./api/envoy proto || \
     [[ "${FORCE_PROTO_FORMAT}" == "yes" ]] || {
         echo "Skipping proto_format.sh due to no API change"
@@ -21,7 +22,8 @@ read -ra BAZEL_BUILD_OPTIONS <<< "${BAZEL_BUILD_OPTIONS:-}"
     }
 
 # Generate //versioning:active_protos.
-./tools/proto_format/active_protos_gen.py ./api > ./api/versioning/BUILD
+./tools/proto_format/active_protos_gen.py #> ./api/versioning/BUILD
+exit 0
 
 # This is for local RBE setup, should be no-op for builds without RBE setting in bazelrc files.
 BAZEL_BUILD_OPTIONS+=("--remote_download_outputs=all")
@@ -60,7 +62,7 @@ bazel build "${BAZEL_BUILD_OPTIONS[@]}" //tools/protoxform:protoprint //tools/pr
 
 # Need to regenerate //versioning:active_protos before building type DB below if freezing.
 if [[ "$1" == "freeze" ]]; then
-    ./tools/proto_format/active_protos_gen.py ./api > ./api/versioning/BUILD
+    ./tools/proto_format/active_protos_gen.py > ./api/versioning/BUILD
 fi
 
 # Generate api/BUILD file based on updated type database.

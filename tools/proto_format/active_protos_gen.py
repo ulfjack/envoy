@@ -60,9 +60,16 @@ def find_pkgs(package_version_status, api_root):
 
 
 if __name__ == '__main__':
-    api_root = sys.argv[1]
-    active_pkgs = find_pkgs('ACTIVE', api_root)
-    frozen_pkgs = find_pkgs('FROZEN', api_root)
+    api_directories = ['./api']
+    for root, dirs, files in os.walk('./contrib'):
+        for dir in dirs:
+            if dir == 'api':
+                api_directories.append(os.path.join(root, dir))
+    active_pkgs = set()
+    frozen_pkgs = set()
+    for api_dir in api_directories:
+      active_pkgs.update(find_pkgs('ACTIVE', api_dir))
+      frozen_pkgs.update(find_pkgs('FROZEN', api_dir))
     sys.stdout.write(
         BUILD_FILE_TEMPLATE.substitute(
             active_pkgs=deps_format(active_pkgs), frozen_pkgs=deps_format(frozen_pkgs)))

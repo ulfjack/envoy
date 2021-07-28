@@ -22,7 +22,7 @@ EXCLUDED_PREFIXES = (
     "./.git/",
     "./bazel-",
     "./.cache",
-    "./source/extensions/extensions_build_config.bzl",
+    "./extensions_build_config.bzl",
     "./bazel/toolchains/configs/",
     "./tools/testdata/check_format/",
     "./tools/pyformat/",
@@ -97,8 +97,8 @@ STD_REGEX_ALLOWLIST = (
     "./source/common/common/regex.cc", "./source/common/stats/tag_extractor_impl.h",
     "./source/common/stats/tag_extractor_impl.cc",
     "./source/common/formatter/substitution_formatter.cc",
-    "./source/extensions/filters/http/squash/squash_filter.h",
-    "./source/extensions/filters/http/squash/squash_filter.cc", "./source/server/admin/utils.h",
+    "./contrib/filters/http/squash/source/squash_filter.h",
+    "./contrib/filters/http/squash/source/squash_filter.cc", "./source/server/admin/utils.h",
     "./source/server/admin/utils.cc", "./source/server/admin/stats_handler.h",
     "./source/server/admin/stats_handler.cc", "./source/server/admin/prometheus_stats.h",
     "./source/server/admin/prometheus_stats.cc", "./tools/clang_tools/api_booster/main.cc",
@@ -281,6 +281,7 @@ class FormatChecker:
         self.target_path = args.target_path
         self.api_prefix = args.api_prefix
         self.api_shadow_root = args.api_shadow_prefix
+        self.contrib_prefix = './contrib/'
         self.envoy_build_rule_check = not args.skip_envoy_build_rule_check
         self.namespace_check = args.namespace_check
         self.namespace_check_excluded_paths = args.namespace_check_excluded_paths + [
@@ -484,7 +485,9 @@ class FormatChecker:
         return file_path in BUILD_URLS_ALLOWLIST
 
     def is_api_file(self, file_path):
-        return file_path.startswith(self.api_prefix) or file_path.startswith(self.api_shadow_root)
+        return file_path.startswith(self.api_prefix) or file_path.startswith(
+            self.api_shadow_root) or (
+                file_path.startswith(self.contrib_prefix) and 'api' in file_path)
 
     def is_build_file(self, file_path):
         basename = os.path.basename(file_path)
